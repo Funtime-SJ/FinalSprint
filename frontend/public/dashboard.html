@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Dashboard</title>
+  </head>
+  <body>
+    <h1>Dashboard</h1>
+    <p>You are logged in.</p>
+    <button id="logout">Logout</button>
+    <script>
+      document.getElementById('logout').addEventListener('click', async () => {
+        await fetch('/auth/logout', { method: 'POST' });
+        window.location = '/';
+      });
+    </script>
+  </body>
+</html>
