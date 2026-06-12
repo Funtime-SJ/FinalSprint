@@ -70,6 +70,22 @@ router.post('/:id/purchase', requireLoginApi, (req, res) => {
   });
 });
 
+// Public: list all products
+router.get('/list', (req, res) => {
+  db.all('SELECT id, seller_id, title, price FROM products', [], (err, rows) => {
+    if (err) return res.status(500).json({ error: 'DB error' });
+    res.json({ products: rows });
+  });
+});
+
+// Seller: list own products
+router.get('/seller', requireLoginApi, (req, res) => {
+  db.all('SELECT id, title, price FROM products WHERE seller_id = ?', [req.session.userId], (err, rows) => {
+    if (err) return res.status(500).json({ error: 'DB error' });
+    res.json({ products: rows });
+  });
+});
+
 // Seller: view orders for my products
 router.get('/seller/orders', requireLoginApi, (req, res) => {
   const sellerId = req.session.userId;

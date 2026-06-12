@@ -10,6 +10,12 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+// handle JSON parse errors gracefully
+app.use((err, req, res, next) => {
+  if (err && err.type === 'entity.parse.failed') return res.status(400).json({ error: 'Invalid JSON' });
+  if (err && err instanceof SyntaxError) return res.status(400).json({ error: 'Invalid JSON' });
+  next(err);
+});
 app.use(session({
   secret: 'change-me',
   resave: false,
@@ -18,6 +24,19 @@ app.use(session({
 
 app.use('/auth', auth);
 app.use('/products', products);
+
+app.get('/products.html', requireLogin, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'products.html'));
+});
+app.get('/seller-products.html', requireLogin, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'seller-products.html'));
+});
+app.get('/orders.html', requireLogin, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'orders.html'));
+});
+app.get('/seller-orders.html', requireLogin, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'seller-orders.html'));
+});
 
 app.use(express.static(path.join(__dirname, 'public')));
 

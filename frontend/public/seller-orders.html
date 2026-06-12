@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Seller Orders</title>
+  </head>
+  <body>
+    <nav>
+      <a href="/">Home</a> |
+      <a href="/register.html">Register</a> |
+      <a href="/login.html">Login</a> |
+      <a href="/dashboard">Dashboard</a> |
+      <a href="/products.html">Products</a> |
+      <a href="/seller-products.html">My Products</a> |
+      <a href="/orders.html">My Orders</a>
+    </nav>
+    <h1>Seller Orders</h1>
+    <button id="refresh">Refresh</button>
+    <ul id="sellerOrders"></ul>
+    <script>
+      const list = document.getElementById('sellerOrders');
+      const refresh = document.getElementById('refresh');
+      async function load() {
+        const res = await fetch('/products/seller/orders');
+        if (!res.ok) return;
+        const data = await res.json();
+        list.innerHTML = data.orders.map(order => `<li>Product ${order.product_id} (${order.title}) bought by ${order.buyer_id} x${order.quantity} on ${order.created_at}</li>`).join('');
+      }
+      refresh.addEventListener('click', load);
+      load();
+    </script>
+  </body>
+</html>

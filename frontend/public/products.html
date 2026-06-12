@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Products</title>
+  </head>
+  <body>
+    <nav>
+      <a href="/">Home</a> |
+      <a href="/register.html">Register</a> |
+      <a href="/login.html">Login</a> |
+      <a href="/dashboard">Dashboard</a> |
+      <a href="/seller-products.html">My Products</a> |
+      <a href="/orders.html">My Orders</a> |
+      <a href="/seller-orders.html">Seller Orders</a>
+    </nav>
+    <h1>Products</h1>
+    <div>
+      <h2>Create Product</h2>
+      <form id="createProductForm">
+        <label>Title: <input name="title" required></label><br>
+        <label>Price: <input type="number" name="price" required></label><br>
+        <button type="submit">Create Product</button>
+      </form>
+      <p id="createMsg"></p>
+    </div>
+    <div>
+      <h2>Product List</h2>
+      <button id="refreshProducts">Refresh</button>
+      <ul id="productList"></ul>
+    </div>
+    <script>
+      const createForm = document.getElementById('createProductForm');
+      const createMsg = document.getElementById('createMsg');
+      const productList = document.getElementById('productList');
+      const refreshButton = document.getElementById('refreshProducts');
+
+      async function loadProducts() {
+        const res = await fetch('/products/list');
+        if (!res.ok) return;
+        const data = await res.json();
+        productList.innerHTML = data.products.map(product => 
+          `<li>${product.title} - $${product.price} <button data-id="${product.id}" class="buy">Buy</button></li>`
+        ).join('');
+        document.querySelectorAll('.buy').forEach(button => {
+          button.addEventListener('click', async () => {
+            const id = button.dataset.id;
+            const response = await fetch(`/products/${id}/purchase`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({quantity: 1}) });
+            const json = await response.json();
+            if (response.ok) createMsg.textContent = 'Purchased successfully';
+            else createMsg.textContent = json.error || 'Purchase failed';
+          });
+        });
+      }
+
+      createForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = new FormData(createForm);
+        const body = { title: data.get('title'), price: Number(data.get('price')) };
+        const res = await fetch('/products', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body) });
+        const json = await res.json();
+        createMsg.textContent = res.ok ? 'Product created' : json.error || 'Error';
+        if (res.ok) createForm.reset();
+        loadProducts();
+      });
+
+      refreshButton.addEventListener('click', loadProducts);
+      loadProducts();
+    </script>
+  </body>
+</html>
