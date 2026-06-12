@@ -2,6 +2,7 @@ const express = require('express');
 const session = require('express-session');
 const path = require('path');
 const auth = require('./routes/auth');
+const products = require('./routes/products');
 require('./db');
 
 const app = express();
@@ -16,6 +17,7 @@ app.use(session({
 }));
 
 app.use('/auth', auth);
+app.use('/products', products);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
